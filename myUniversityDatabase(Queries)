@@ -1,0 +1,549 @@
+
+
+-- database create / drop / alter / use
+create database myUniversityDatabase;
+
+-- drop database myUniversityDatabase; -- ⚠️ do not run this after putting all the info into the database
+-- otherwise you will lose all the data and you need to put datas again.
+
+-- create database myUniversityDatabase;
+
+use myUniversityDatabase;
+
+-- create tables (simple version first)
+-- students
+create table students(
+	student_id varchar(20),
+    student_name varchar(50),
+    student_dept varchar(50),
+    student_dob date,
+    student_yearofenrollment varchar(10),
+    programid varchar(30)
+);
+-- altering programid to program_id
+alter table students
+rename column programid to program_id;
+
+-- program
+create table program(
+	name varchar(100),
+    program_id varchar(30),
+    department_id varchar(50)
+);
+-- department
+create table department(
+	name varchar(100),
+    department_id varchar(50)
+);
+-- courses
+create table courses(
+	course_code varchar(20),
+    credit int,
+    name varchar(100)
+);
+-- instructors
+create table instructors(
+	instructor_id varchar(30),
+    instructor_name varchar(100),
+    sem int,
+    hours decimal(5,2),
+    department_id varchar(50)
+);
+
+-- rename tables
+rename table program to programs;
+rename table department to departments;
+
+-- adding primary keys
+alter table students
+add constraint pk_students
+primary key(student_id);
+
+alter table programs
+add constraint pk_programs
+primary key(program_id);
+
+alter table departments
+add constraint pk_departments
+primary key(department_id);
+
+alter table courses
+add constraint pk_courses
+primary key(course_code);
+
+alter table instructors
+add constraint pk_instructors
+primary key(instructor_id);
+
+-- add not null constraints
+alter table students
+modify student_name varchar(50) not null;
+
+alter table students
+modify student_dob date not null;
+
+alter table programs
+modify name varchar(100) not null;
+
+alter table departments
+modify name varchar(100) not null;
+
+-- add check constraints
+alter table instructors
+add constraint chk_hours
+check(hours <= 40);
+
+alter table courses
+add constraint chk_credit
+check(credit > 0);
+
+-- alter table students
+-- alter student_yearofenrollment
+-- set default '2024';
+
+-- add foreign keys
+-- students → programs
+alter table students
+add constraint fk_student_program
+foreign key(program_id)
+references programs(program_id);
+-- programs → departments
+alter table programs
+add constraint fk_program_department
+foreign key(department_id)
+references departments(department_id);
+-- instructors → departments
+alter table instructors
+add constraint fk_instructor_department
+foreign key(department_id)
+references departments(department_id);
+
+-- create junction tables
+-- student_course
+create table student_course(
+	student_id varchar(20),
+    course_code varchar(20)
+);
+-- constraints
+alter table student_course
+add primary key(student_id, course_code);
+
+-- adding constraints
+alter table student_course
+add constraint fk_sc_student
+foreign key(student_id)
+references students(student_id);
+
+alter table student_course
+add constraint fk_sc_course
+foreign key(course_code)
+references courses(course_code);
+
+-- program_course
+create table program_course(
+	program_id varchar(30),
+    course_code varchar(20)
+);
+
+-- constraints
+alter table program_course
+add primary key(program_id, course_code);
+
+alter table program_course
+add constraint fk_pc_program
+foreign key(program_id)
+references programs(program_id);
+
+alter table program_course
+add constraint fk_pc_course
+foreign key(course_code)
+references courses(course_code);
+
+-- instructor_teaches
+create table instructor_teaches(
+	instructor_id varchar(30),
+    course_code varchar(20)
+);
+-- constraints
+alter table instructor_teaches
+add primary key(instructor_id, course_code);
+
+alter table instructor_teaches
+add constraint fk_it_instructor
+foreign key(instructor_id)
+references instructors(instructor_id);
+
+alter table instructor_teaches
+add constraint fk_it_course
+foreign key(course_code)
+references courses(course_code);
+
+-- INSERTING DATA
+
+-- departments
+insert into departments values
+('computer science', 'd01'),
+('electronics', 'd02');
+
+-- programs
+insert into programs values
+('btech cse', 'p01', 'd01'),
+('btech ece', 'p02', 'd02');
+
+-- courses
+insert into courses values
+('cs101', 4, 'programming'),
+('ec101', 3, 'circuits');
+
+-- students
+insert into students values
+('s01', 'rahul', 'cse', '2004-05-10', '2023', 'p01'),
+('s02', 'aman', 'ece', '2005-02-12', '2024', 'p02');
+insert into students values
+('s03', 'rohit', 'cse', '2004-09-21', '2023', 'p01');
+
+-- instructors
+insert into instructors values
+('i01', 'dr sharma', 1, 35.50, 'd01'),
+('i02', 'dr gupta', 2, 30.00, 'd02');
+
+-- student_course
+insert into student_course values
+('s01', 'cs101'),
+('s02', 'ec101');
+insert into student_course values
+('s03', 'cs101');
+
+-- program_course
+insert into program_course values
+('p01', 'cs101'),
+('p02', 'ec101');
+
+-- instructor_teaches
+insert into instructor_teaches values
+('i01', 'cs101'),
+('i02', 'ec101');
+
+-- update student name
+update students
+set student_name = 'rahul kumar'
+where student_id = 's01';
+
+-- update course credit
+update courses
+set credit = 5
+where course_code = 'cs101';
+
+-- delete course mapping
+set foreign_key_checks = 0;
+delete from students 
+where student_id = "s03";
+select * from students;
+set foreign_key_checks = 1;
+
+select * from courses;
+select * from departments;
+select * from instructors;
+select * from programs;
+select * from students;
+select * from instructor_teaches;
+select * from program_course;
+select * from student_course;
+
+-- INSERTING DATA 2.0
+
+-- departments
+insert into departments values
+('mechanical', 'd03'),
+('civil', 'd04'),
+('information technology', 'd05');
+
+-- programs
+insert into programs values
+('btech mechanical', 'p03', 'd03'),
+('btech civil', 'p04', 'd04'),
+('btech it', 'p05', 'd05');
+
+-- courses
+insert into courses values
+('me101', 4, 'thermodynamics'),
+('cv101', 3, 'engineering mechanics'),
+('it101', 4, 'data structures');
+
+-- students
+insert into students values
+('s04', 'vikas', 'me', '2004-11-15', '2023', 'p03'),
+('s05', 'neha', 'civil', '2005-03-18', '2024', 'p04'),
+('s06', 'ravi', 'it', '2004-07-09', '2023', 'p05');
+
+-- instructors
+insert into instructors values
+('i03', 'dr mehta', 1, 32.00, 'd03'),
+('i04', 'dr singh', 2, 28.50, 'd04'),
+('i05', 'dr verma', 1, 36.00, 'd05');
+
+-- student_course
+insert into student_course values
+('s04', 'me101'),
+('s05', 'cv101'),
+('s06', 'it101');
+
+-- program_course
+insert into program_course values
+('p03', 'me101'),
+('p04', 'cv101'),
+('p05', 'it101');
+
+-- instructor_teaches
+insert into instructor_teaches values
+('i03', 'me101'),
+('i04', 'cv101'),
+('i05', 'it101');
+
+select * from courses;
+select * from departments;
+select * from instructors;
+select * from programs;
+select * from students;
+select * from instructor_teaches;
+select * from program_course;
+select * from student_course;
+
+-- where
+select * from courses
+where course_code = 'cs101';
+
+-- like
+select * from instructors
+where instructor_name like '%ma';
+
+-- distinct
+select distinct department_id
+from instructors;
+
+-- between
+select * from instructors
+where hours between 25 and 30;
+
+-- in
+select * from programs
+where program_id in ('p01', 'p02');
+
+-- exists
+select * from programs p
+where exists (
+    select 1 from program_course pc
+    where pc.program_id = p.program_id
+);
+
+-- like
+select * from courses
+where name like '%data%';
+
+-- join
+select c.name, pc.program_id
+from courses c
+join program_course pc
+on c.course_code = pc.course_code;	
+
+-- LAB 06
+-- distinct
+select distinct department_id
+from instructors;
+
+-- count 
+select count(*) as total_students
+from students;
+
+-- order by
+select student_id, student_name
+from students
+order by student_name;
+
+select student_id, student_name
+from students
+order by student_name desc;
+
+-- group by
+select program_id, count(*) as total_students
+from students
+group by program_id;
+
+-- top
+select *
+from students
+limit 2;
+
+-- max 
+select max(hours) as maximum_hours
+from instructors;
+
+-- group by + count  
+select department_id, count(instructor_id) as total_instructors
+from instructors
+group by department_id;
+  
+-- LAB 7
+-- inner join
+SELECT s.student_id, s.student_name, p.name AS program_name
+FROM students s
+INNER JOIN programs p
+ON s.program_id = p.program_id;
+
+-- left join
+SELECT s.student_id, s.student_name, sc.course_code
+FROM students s
+LEFT JOIN student_course sc
+ON s.student_id = sc.student_id;
+
+-- right join
+SELECT sc.course_code, s.student_name
+FROM students s
+RIGHT JOIN student_course sc
+ON s.student_id = sc.student_id;
+
+-- full join
+SELECT s.student_id, s.student_name, p.name
+FROM students s
+LEFT JOIN programs p
+ON s.program_id = p.program_id
+
+UNION
+
+SELECT s.student_id, s.student_name, p.name
+FROM students s
+RIGHT JOIN programs p
+ON s.program_id = p.program_id;
+
+-- non-equi join
+SELECT i.instructor_name, i.hours, c.name, c.credit
+FROM instructors i
+JOIN courses c
+ON i.hours > c.credit;
+
+-- LAB 08 (Subqueries in SQL)
+-- Students enrolled in ‘BTech CSE’
+select student_name
+from students
+where program_id = (
+    select program_id
+    from programs
+    where name = 'btech cse'
+);
+
+-- Courses with maximum credit
+select *
+from courses
+where credit = (
+    select max(credit)
+    from courses
+);
+
+-- Instructors working more than average hour
+select instructor_name, hours
+from instructors
+where hours > (
+    select avg(hours)
+    from instructors
+);
+
+-- LAB 09
+-- Views in SQL
+
+-- Create View
+create view student_program_view as
+select s.student_id, s.student_name, p.name as program_name
+from students s
+join programs p
+on s.program_id = p.program_id;
+
+-- Display View
+select * from student_program_view;
+
+-- Drop View
+drop view student_program_view;
+
+-- LAB 10 (Grant Access and Privileges)
+
+-- Grant SELECT privileg
+-- Create a User
+create user 'user1'@'localhost' identified by 'password123';
+
+-- Grant Privileges
+grant select
+on students
+to 'user1'@'localhost';
+-- Grant all privileges:
+grant all privileges
+on myUniversityDatabase.*
+to 'user1'@'localhost';
+
+-- Revoke Privileges
+revoke select, insert, update, delete
+on myUniversityDatabase.*
+from 'user1'@'localhost';
+
+-- Apply Changes
+flush privileges;
+
+-- LAB 11(Transaction Control Management)
+-- Start Transaction & COMMIT
+start transaction;
+
+update students
+set student_name = 'Aman Kumar'
+where student_id = 's02';
+
+commit;
+
+-- ROLLBACK
+start transaction;
+
+update students
+set student_name = 'Wrong Name'
+where student_id = 's01';
+
+rollback;
+
+-- SAVEPOINT
+start transaction;
+
+update students set student_name = 'Rahul' where student_id = 's01';
+
+savepoint sp1;
+
+update students set student_name = 'Rohit' where student_id = 's01';
+
+rollback to sp1;
+
+commit;
+
+-- LAB 12
+-- Create Trigger
+delimiter $$
+
+create trigger check_credit
+before insert on courses
+for each row
+begin
+    if new.credit <= 0 then
+        signal sqlstate '45000'
+        set message_text = 'Credit must be positive';
+    end if;
+end$$
+
+delimiter ;
+
+-- Create Stored Proced
+delimiter $$
+
+create procedure get_students()
+begin
+    select * from students;
+end$$
+
+delimiter ;
+
+-- Call Stored Procedure
+call get_students();
+
