@@ -1,5 +1,4 @@
 
-
 -- database create / drop / alter / use
 create database myUniversityDatabase;
 
